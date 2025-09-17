@@ -1,7 +1,7 @@
 import { Protect } from "@clerk/clerk-react"
 import { Gem, Sparkles } from "lucide-react"
 import { useEffect, useState } from "react"
-import { dummyCreationData } from "../assets/assets"
+import { dummyCreationData } from "../assets/assets.js"
 import CreationItem from "../components/CreationItem"
 
 const Dashboard=() =>{
