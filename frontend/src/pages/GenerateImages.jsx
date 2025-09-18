@@ -1,6 +1,12 @@
 
 import { Image, Sparkles } from "lucide-react"
 import { useState } from "react"
+import axios from "axios"
+import toast from "react-hot-toast"
+import { useAuth } from "@clerk/clerk-react"
+
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL
+
 
 const GenerateImages = () => {
 
@@ -11,9 +17,32 @@ const GenerateImages = () => {
   const [selectedStyle,setSelectedStyle] = useState('Realistic')
   const [input,setInput] = useState('')
   const [publish,setPublish] = useState(false)
+  const [content,setContent] = useState('')
+  const [loading,setLoading] = useState(false)
+
+  const {getToken}= useAuth()
 
   const onSubmitHandler = async (e)=>{
     e.preventDefault()
+    try {
+      setLoading(true)
+      const prompt = `Generate an image of ${input}
+       in the style ${selectedStyle}`
+
+      const {data} = await axios.post('/api/ai/generate-image',{prompt, publish},
+        {
+          headers : {Authorization :`Bearer ${await getToken()} `}
+        })
+
+        if (data.success) {
+          setContent(data.content)
+        } else {
+          toast.error(data.message)
+        }
+    } catch (error) {
+      toast.error(error.message)
+    }
+    setLoading(false)
   }
 
 
@@ -64,11 +93,15 @@ const GenerateImages = () => {
       </div>
 
       
-      <button className="w-full flex justify-center gap-2 bg-gradient-to-r
+      <button disabled={loading} className="w-full flex justify-center gap-2 bg-gradient-to-r
       from-[#00AD25] to-[#04FF50] text-white px-4 py-2 mt-4
       text-sm rounded-lg cursor-pointer ">
-        <Image className="w-5" />
-        Generate image
+        {
+          loading ? <span className="w-4 h-4 my-1 rounded-full border-2
+          border-t-transparent animate-spin "></span>
+          :<Image className="w-5" /> 
+        }
+       Generate image
       </button>
 
       </form>
@@ -82,12 +115,17 @@ const GenerateImages = () => {
           <h1 className="text-xl font-semibold">Generated image</h1>
         </div>
 
-        <div className="flex items-center flex-1 justify-center">
+        {!content ? (<div className="flex items-center flex-1 justify-center">
           <div className="flex flex-col items-center gap-5 text-sm text-gray-400">
             <Image className=" w-9 h-9 " />
             <p>Enter a topic and click "Generate image" to get started </p>
           </div> 
-        </div>
+        </div>) : (
+          <div className="mt-3 h-full">
+            <img src={content} alt="image" className="w-full h-full" />
+          </div>
+        )}
+        
         
       </div>
        

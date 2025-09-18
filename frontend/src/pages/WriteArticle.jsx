@@ -1,5 +1,11 @@
 import { Edit, Sparkles } from "lucide-react"
 import { useState } from "react"
+import { useAuth } from "@clerk/clerk-react"
+import axios from "axios"
+import toast from "react-hot-toast"
+import Markdown from "react-markdown"
+
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL
 
 const WriteArticle = () => {
 
@@ -11,9 +17,32 @@ const WriteArticle = () => {
 
   const [selectedLength,setSelectedLength] = useState(articleLength[0])
   const [input,setInput] = useState('')
+  const [content,setContent] = useState('')
+  const [loading,setLoading] = useState(false)
+
+  const {getToken}= useAuth()
 
   const onSubmitHandler = async (e)=>{
     e.preventDefault()
+    try {
+      setLoading(true)
+      const prompt = `Write an article about ${input} in ${selectedLength.text}`
+
+      const {data} = await axios.post('/api/ai/generate-article',{prompt,
+        length: selectedLength.length},{
+          headers : {Authorization :`Bearer ${await getToken()} `}
+        })
+
+        if (data.success) {
+          setContent(data.content)
+        } else {
+          toast.error(data.message)
+        }
+    } catch (error) {
+      toast.error(error.message)
+
+    }
+    setLoading(false)
   }
 
 
@@ -45,10 +74,14 @@ const WriteArticle = () => {
     ))}
       </div>
       <br />
-      <button className="w-full flex justify-center gap-2 bg-gradient-to-r
+      <button disabled={loading} className="w-full flex justify-center gap-2 bg-gradient-to-r
       from-[#226BFF] to-[#65ADFF] text-white px-4 py-2 mt-4
       text-sm rounded-lg cursor-pointer ">
-        <Edit className="w-5" />
+        {
+          loading ? <span className="w-4 h-4 my-1 rounded-full border-2
+          border-t-transparent animate-spin "></span>
+          : <Edit className="w-5" />
+        }
         Generate article
       </button>
 
@@ -63,12 +96,20 @@ const WriteArticle = () => {
           <h1 className="text-xl font-semibold">Generated article</h1>
         </div>
 
-        <div className="flex items-center flex-1 justify-center">
+        {!content ? (
+          <div className="flex items-center flex-1 justify-center">
           <div className="flex flex-col items-center gap-5 text-sm text-gray-400">
             <Edit className=" w-9 h-9 " />
             <p>Enter a topic and click "Generate article" to get started </p>
           </div> 
         </div>
+        ) : (
+          <div className="mt-3 h-full overflow-y-scroll text-sm text-slate-600">
+            <div className="reset-tw">
+              <Markdown>{content}</Markdown>
+              </div>
+          </div>
+        )}
         
       </div>
        
