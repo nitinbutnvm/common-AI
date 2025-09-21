@@ -69,7 +69,7 @@ const RemoveBackground = () => {
           border-t-transparent animate-spin "></span>
           :<Eraser className="w-5" />
         }
-        Remove ackground
+        Remove background
       </button>
 
       </form>
