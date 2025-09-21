@@ -143,7 +143,7 @@ try {
 
     
 const {secure_url} =await
- cloudinary.uploader.upload(image.path, {
+cloudinary.uploader.upload(image.path, {
     transformation:[
         {
             effect : "background_removal",

@@ -40,20 +40,20 @@ export const toggleLikeCreation = async(req, res )=>{
 
         }
 
-        const currrentLikes = creation.currrentLikes
+        const currrentLikes = creation.likes
         const userIdStr = userId.toString()
-        let updateLikes
+        let updatedLikes
         let messsage
 
         if (currrentLikes.includes(userIdStr)) {
-            updateLikes = currrentLikes.filter((user)=>user !== userIdStr)
+            updatedLikes = currrentLikes.filter((user)=>user !== userIdStr)
             messsage= 'Creation Unliked'
         } else {
-            updateLikes = [...currrentLikes, userIdStr]
+            updatedLikes = [...currrentLikes, userIdStr]
             messsage =  'Creation Liked'
         }
-// json h ya join??
-        const formattedArray = `{${updateLikes.json(",")}}`
+
+        const formattedArray = `{${updatedLikes.join(",")}}`
 
       await sql`UPDATE creations SET likes = ${formattedArray}::text[] WHERE id = ${id} `
 
